@@ -1,10 +1,10 @@
-import telebot  # ←←← ЭТА СТРОКА ОБЯЗАТЕЛЬНА! Без неё telebot неизвестен
-import os       # Для безопасного чтения токена
+import telebot  # Обязательный импорт библиотеки
+import os       # Для чтения переменных окружения (на всякий случай)
 
-# Берём токен из переменных окружения Bothost
-TOKEN = os.getenv('TOKEN')
+# Берём токен из переменных Bothost (он уже там есть как TOKEN или BOT_TOKEN)
+TOKEN = os.getenv('TOKEN') or os.getenv('BOT_TOKEN') or os.getenv('API_TOKEN')
 
-if TOKEN is None:
+if not TOKEN:
     print("ОШИБКА: Токен не найден в переменных окружения!")
     exit()
 
@@ -33,10 +33,11 @@ PR GRAM обеспечивает удобные и гибкие настройк
 
     bot.reply_to(message, welcome_text)
 
+# Ответ на другие сообщения
 @bot.message_handler(func=lambda message: True)
 def echo_all(message):
-    user_name = message.from_user.first_name if message.from_user.first_name else "друг"
-    bot.reply_to(message, f"Привет, {user_name}! 😊\nПока я отвечаю только на /start, но скоро будет больше функций!")
+    user_name = message.from_user.first_name or "друг"
+    bot.reply_to(message, f"Привет, {user_name}! 😊\nЯ — бот PR GRAM. Используй /start для приветствия!")
 
-print("Бот успешно запущен на Bothost Pro!")
+print("Бот PR GRAM успешно запущен и работает 24/7!")
 bot.infinity_polling()
