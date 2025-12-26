@@ -49,6 +49,21 @@ def get_cabinet_keyboard():
     keyboard.add(KeyboardButton("🔙 Назад в меню"))
     return keyboard
 
+# Подменю "Пополнить баланс"
+def get_topup_keyboard():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+    keyboard.add(
+        KeyboardButton("90,000 belcoin = 50 ⭐"),
+        KeyboardButton("180,000 belcoin = 100 ⭐"),
+        KeyboardButton("450,000 belcoin = 250 ⭐"),
+        KeyboardButton("1,350,000 belcoin = 750 ⭐"),
+        KeyboardButton("2,700,000 belcoin = 1499 ⭐"),
+        KeyboardButton("4,500,000 belcoin = 2499 ⭐")
+    )
+    keyboard.add(KeyboardButton("⭐ Другая сумма"))
+    keyboard.add(KeyboardButton("🔙 Назад"))
+    return keyboard
+
 @bot.message_handler(commands=['start'])
 def start(message):
     welcome_text = """
@@ -81,19 +96,29 @@ def handle_text(message):
 Ваш кабинет:
 
 🔑 Мой ID: {message.from_user.id}
-💰 Баланс: 0 GRAM
+💰 Баланс: 0 belcoin
         """.strip()
 
         bot.send_message(message.chat.id, cabinet_text, reply_markup=get_cabinet_keyboard())
 
-    elif text == "🔙 Назад в меню":
-        bot.send_message(message.chat.id, "Вы вернулись в главное меню 👇", reply_markup=get_main_keyboard())
+    elif text == "💰 Пополнить баланс":
+        topup_text = """
+Если возникли проблемы с пополнением — обращайтесь: @Tsunami_TG
 
-    elif text in ["💰 Заработать", "📢 Рекламировать", "🧾 Чеки", "🔊 ОП (Проверка подписки)", "🤖 Наши боты / Статистика", "🔗 Полезные ссылки", "📝 Инструкция"]:
-        bot.send_message(message.chat.id, "Эта функция в разработке 🚧\nВыберите другую кнопку.", reply_markup=get_main_keyboard())
+Введите сумму пополнения в belcoin
+или выберите:
+        """.strip()
+
+        bot.send_message(message.chat.id, topup_text, reply_markup=get_topup_keyboard())
+
+    elif text == "🔙 Назад" or text == "🔙 Назад в меню":
+        bot.send_message(message.chat.id, "Вы вернулись в предыдущее меню 👇", reply_markup=get_cabinet_keyboard())
+
+    elif text in ["💰 Заработать", "📢 Рекламировать", "🧾 Чеки", "👥 Реферальная система", "📈 Уровневая система", "🎒 Мои задания", "🌐 Изменить язык", "❌ Отключить уведомления", "🔊 ОП (Проверка подписки)", "🤖 Наши боты / Статистика", "🔗 Полезные ссылки", "📝 Инструкция"]:
+        bot.send_message(message.chat.id, "Эта функция в разработке 🚧", reply_markup=get_main_keyboard() if text in ["💰 Заработать", "📢 Рекламировать", "🧾 Чеки", "🔊 ОП (Проверка подписки)", "🤖 Наши боты / Статистика", "🔗 Полезные ссылки", "📝 Инструкция"] else get_cabinet_keyboard())
 
     else:
         bot.send_message(message.chat.id, "Пожалуйста, используйте кнопки меню 👇", reply_markup=get_main_keyboard())
 
-print("Бот PR GRAM с кабинетами и кнопками успешно запущен!")
+print("Бот PR GRAM с пополнением belcoin успешно запущен!")
 bot.infinity_polling()
