@@ -1,14 +1,35 @@
-import telebot  # ← Обязательно! Импорт библиотеки
-import os       # Для чтения переменных окружения
+import telebot
+import os
+from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 
-# Берём токен из переменных Bothost (у тебя он уже есть как TOKEN, BOT_TOKEN и т.д.)
 TOKEN = os.getenv('TOKEN') or os.getenv('BOT_TOKEN') or os.getenv('API_TOKEN') or os.getenv('TELEGRAM_BOT_TOKEN')
 
 if not TOKEN:
-    print("КРИТИЧЕСКАЯ ОШИБКА: Токен не найден в переменных окружения!")
+    print("КРИТИЧЕСКАЯ ОШИБКА: Токен не найден!")
     exit()
 
 bot = telebot.TeleBot(TOKEN)
+
+# Создаём постоянную клавиатуру (появляется внизу)
+def get_main_keyboard():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+    keyboard.add(
+        KeyboardButton("💰 Заработать"),
+        KeyboardButton("📢 Рекламировать")
+    )
+    keyboard.add(
+        KeyboardButton("🧾 Чеки"),
+        KeyboardButton("📊 Мой кабинет")
+    )
+    keyboard.add(
+        KeyboardButton("🔊 ОП (Проверка подписки)"),
+        KeyboardButton("🤖 Наши боты / Статистика")
+    )
+    keyboard.add(
+        KeyboardButton("🔗 Полезные ссылки"),
+        KeyboardButton("📝 Инструкция")
+    )
+    return keyboard
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -31,12 +52,31 @@ PR GRAM обеспечивает удобные и гибкие настройк
 💡 Используя бота, вы автоматически соглашаетесь с нашей политикой конфиденциальности.
     """.strip()
 
-    bot.reply_to(message, welcome_text)
+    bot.send_message(message.chat.id, welcome_text, reply_markup=get_main_keyboard())
 
-@bot.message_handler(func=lambda message: True)
-def echo_all(message):
-    user_name = message.from_user.first_name or "друг"
-    bot.reply_to(message, f"Привет, {user_name}! 😊\nНапишите /start для главного меню.")
+# Ответ на текстовые сообщения (по кнопкам)
+@bot.message_handler(content_types=['text'])
+def handle_text(message):
+    text = message.text
 
-print("Бот PR GRAM успешно запущен и онлайн 24/7!")
+    if text == "💰 Заработать":
+        bot.reply_to(message, "Здесь будет информация, как зарабатывать в PR GRAM.\nСкоро добавим! 🚀")
+    elif text == "📢 Рекламировать":
+        bot.reply_to(message, "Раздел для размещения рекламы.\nИнструкция: [ссылка]")
+    elif text == "🧾 Чеки":
+        bot.reply_to(message, "Ваши чеки и выплаты.\nПока пусто 🙂")
+    elif text == "📊 Мой кабинет":
+        bot.reply_to(message, "Статистика вашего аккаунта.\nБаланс: 0 руб.\nПодписчики: 0")
+    elif text == "🔊 ОП (Проверка подписки)":
+        bot.reply_to(message, "Настройка обязательной подписки для ваших чатов.\nСсылка на панель: [ссылка]")
+    elif text == "🤖 Наши боты / Статистика":
+        bot.reply_to(message, "Список наших ботов и общая статистика PR GRAM.")
+    elif text == "🔗 Полезные ссылки":
+        bot.reply_to(message, "Полезные ссылки:\n• Основной канал\n• Поддержка\n• Правила")
+    elif text == "📝 Инструкция":
+        bot.reply_to(message, "Полная инструкция по работе с PR GRAM:\n[ссылка на инструкцию]")
+    else:
+        bot.reply_to(message, "Выберите кнопку из меню ниже 👇", reply_markup=get_main_keyboard())
+
+print("Бот PR GRAM с клавиатурой успешно запущен!")
 bot.infinity_polling()
