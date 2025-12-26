@@ -10,7 +10,7 @@ if not TOKEN:
 
 bot = telebot.TeleBot(TOKEN)
 
-# Создаём постоянную клавиатуру (появляется внизу)
+# Главное меню
 def get_main_keyboard():
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
     keyboard.add(
@@ -29,6 +29,24 @@ def get_main_keyboard():
         KeyboardButton("🔗 Полезные ссылки"),
         KeyboardButton("📝 Инструкция")
     )
+    return keyboard
+
+# Подменю "Мой кабинет"
+def get_cabinet_keyboard():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+    keyboard.add(
+        KeyboardButton("💰 Пополнить баланс"),
+        KeyboardButton("👥 Реферальная система")
+    )
+    keyboard.add(
+        KeyboardButton("📈 Уровневая система"),
+        KeyboardButton("🎒 Мои задания")
+    )
+    keyboard.add(
+        KeyboardButton("🌐 Изменить язык"),
+        KeyboardButton("❌ Отключить уведомления")
+    )
+    keyboard.add(KeyboardButton("🔙 Назад в меню"))
     return keyboard
 
 @bot.message_handler(commands=['start'])
@@ -54,29 +72,28 @@ PR GRAM обеспечивает удобные и гибкие настройк
 
     bot.send_message(message.chat.id, welcome_text, reply_markup=get_main_keyboard())
 
-# Ответ на текстовые сообщения (по кнопкам)
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
     text = message.text
 
-    if text == "💰 Заработать":
-        bot.reply_to(message, "Здесь будет информация, как зарабатывать в PR GRAM.\nСкоро добавим! 🚀")
-    elif text == "📢 Рекламировать":
-        bot.reply_to(message, "Раздел для размещения рекламы.\nИнструкция: [ссылка]")
-    elif text == "🧾 Чеки":
-        bot.reply_to(message, "Ваши чеки и выплаты.\nПока пусто 🙂")
-    elif text == "📊 Мой кабинет":
-        bot.reply_to(message, "Статистика вашего аккаунта.\nБаланс: 0 руб.\nПодписчики: 0")
-    elif text == "🔊 ОП (Проверка подписки)":
-        bot.reply_to(message, "Настройка обязательной подписки для ваших чатов.\nСсылка на панель: [ссылка]")
-    elif text == "🤖 Наши боты / Статистика":
-        bot.reply_to(message, "Список наших ботов и общая статистика PR GRAM.")
-    elif text == "🔗 Полезные ссылки":
-        bot.reply_to(message, "Полезные ссылки:\n• Основной канал\n• Поддержка\n• Правила")
-    elif text == "📝 Инструкция":
-        bot.reply_to(message, "Полная инструкция по работе с PR GRAM:\n[ссылка на инструкцию]")
-    else:
-        bot.reply_to(message, "Выберите кнопку из меню ниже 👇", reply_markup=get_main_keyboard())
+    if text == "📊 Мой кабинет":
+        cabinet_text = f"""
+Ваш кабинет:
 
-print("Бот PR GRAM с клавиатурой успешно запущен!")
+🔑 Мой ID: {message.from_user.id}
+🏆 Уровень: ⭐ Мастер заданий
+✨ 3949/5000 XP
+💰 Баланс: 175 214 GRAM
+        """.strip()
+
+        bot.send_message(message.chat.id, cabinet_text, reply_markup=get_cabinet_keyboard())
+
+    elif text == "🔙 Назад в меню":
+        bot.send_message(message.chat.id, "Вы вернулись в главное меню 👇", reply_markup=get_main_keyboard())
+
+    # Здесь можно добавить обработку других кнопок главного меню
+    else:
+        bot.send_message(message.chat.id, "Выберите кнопку из меню 👇", reply_markup=get_main_keyboard())
+
+print("Бот PR GRAM с подменю 'Мой кабинет' успешно запущен!")
 bot.infinity_polling()
