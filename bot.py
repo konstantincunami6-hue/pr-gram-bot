@@ -60,6 +60,26 @@ def get_tasks_keyboard():
     keyboard.add(KeyboardButton("🔙 Назад"))
     return keyboard
 
+# Подменю "Создать новое задание"
+def get_create_task_keyboard():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+    keyboard.add(
+        KeyboardButton("Канал"),
+        KeyboardButton("Группу")
+    )
+    keyboard.add(
+        KeyboardButton("Пост"),
+        KeyboardButton("Бот")
+    )
+    keyboard.add(
+        KeyboardButton("Премиум буст (заряды)"),
+        KeyboardButton("Реакции")
+    )
+    keyboard.add(KeyboardButton("Настройка авто-заданий"))
+    keyboard.add(KeyboardButton("Мои задания"))
+    keyboard.add(KeyboardButton("🔙 Назад"))
+    return keyboard
+
 @bot.message_handler(commands=['start'])
 def start(message):
     welcome_text = """
@@ -93,56 +113,25 @@ def handle_text(message):
 Ваш кабинет:
 
 🔑 Мой ID: {user_id}
-💰 Баланс: 0 belcoin
+💰 Баланс: 0 TSugram
         """.strip()
 
         bot.send_message(message.chat.id, cabinet_text, reply_markup=get_cabinet_keyboard())
 
-    elif text == "👥 Реферальная система":
-        referral_text = f"""
-За каждого, кто перейдёт по вашей ссылке, вы получите:
-⭐ 10 000 GRAM — если реферал с Telegram Premium
-⭐ 5 000 GRAM — если без Telegram Premium
-⭐ 3 000 GRAM — если реферал присоединился через функцию ОП
+    elif text == "Создать новое задание +":
+        create_task_text = """
+Что вы хотите рекламировать?
 
-Ваш уровень: ⭐ Мастер заданий
-
-А также постоянный доход от их активности:
-🔥 + 10% - от суммы пополнения
-🔥 + 5% - от выполнения заданий
-
-⬆ Повышайте ваш уровень для увеличения вознаграждения от активности рефералов. → подробнее в Уровневой системе
-
-📊 Статистика за весь период:
-👥 Вы пригласили: 0
-💰 Ваш заработок от рефералов:
-• от пополнений рефералами 0 GRAM
-• от выполнения заданий рефералами 0 GRAM
-
-🔗 Ваша реферальная ссылка:
-https://t.me/{bot.get_me().username}?start={user_id}
+💰 Баланс: 0 TSugram
         """.strip()
 
-        bot.send_message(message.chat.id, referral_text, reply_markup=get_cabinet_keyboard())
-
-    elif text == "🎒 Мои задания":
-        tasks_text = """
-Нажмите на кнопки, чтобы выбрать задание
-
-⚠️ Запрещено отписываться ранее чем через 7 дней от групп
-
-В противном случае ваша возможность выполнять задания будет заблокирована, а заработанные средства аннулированы.
-
-Здесь вы можете управлять своими заданиями
-        """.strip()
-
-        bot.send_message(message.chat.id, tasks_text, reply_markup=get_tasks_keyboard())
+        bot.send_message(message.chat.id, create_task_text, reply_markup=get_create_task_keyboard())
 
     elif text == "🔙 Назад" or text == "🔙 Назад в меню":
-        bot.send_message(message.chat.id, "Вы вернулись в предыдущее меню 👇", reply_markup=get_main_keyboard() if text == "🔙 Назад в меню" else get_cabinet_keyboard())
+        bot.send_message(message.chat.id, "Вы вернулись в предыдущее меню 👇", reply_markup=get_main_keyboard() if text == "🔙 Назад в меню" else get_tasks_keyboard())
 
     else:
         bot.send_message(message.chat.id, "Пожалуйста, используйте кнопки меню 👇", reply_markup=get_main_keyboard())
 
-print("Бот PR GRAM полностью восстановлен с реферальной системой и заданиями!")
+print("Бот PR GRAM с валютой TSugram успешно запущен!")
 bot.infinity_polling()
