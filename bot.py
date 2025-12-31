@@ -106,12 +106,13 @@ PR GRAM обеспечивает удобные и гибкие настройк
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
     text = message.text
+    user_id = message.from_user.id
 
     if text == "📊 Мой кабинет":
         cabinet_text = f"""
 Ваш кабинет:
 
-🔑 Мой ID: {message.from_user.id}
+🔑 Мой ID: {user_id}
 💰 Баланс: 0 TSugram
         """.strip()
 
@@ -130,6 +131,26 @@ def handle_text(message):
 
         bot.send_message(message.chat.id, tasks_text, reply_markup=get_tasks_keyboard())
 
+    elif text == "Проверка выполненных заданий (реакции)":
+        unchecked_reactions = 0  # Для теста поменяй на 2 или 5
+
+        if unchecked_reactions == 0:
+            check_text = "✅ Все выполнения проверены"
+        else:
+            check_text = f"У вас не проверено {unchecked_reactions} заданий"
+
+        bot.send_message(message.chat.id, check_text, reply_markup=get_tasks_keyboard())
+
+    elif text == "Проверка выполненных заданий (боты)":
+        unchecked_bots = 0  # Для теста поменяй на 3
+
+        if unchecked_bots == 0:
+            check_text = "✅ Все выполнения проверены"
+        else:
+            check_text = f"У вас не проверено {unchecked_bots} заданий"
+
+        bot.send_message(message.chat.id, check_text, reply_markup=get_tasks_keyboard())
+
     elif text == "Создать новое задание +":
         create_task_text = """
 Что вы хотите рекламировать?
@@ -140,7 +161,7 @@ def handle_text(message):
         bot.send_message(message.chat.id, create_task_text, reply_markup=get_create_task_keyboard())
 
     elif text == "🔙 Назад":
-        bot.send_message(message.chat.id, "Вы вернулись в предыдущее меню 👇", reply_markup=get_tasks_keyboard())
+        bot.send_message(message.chat.id, "Вы вернулись в Мои задания", reply_markup=get_tasks_keyboard())
 
     elif text == "🔙 Назад в меню":
         bot.send_message(message.chat.id, "Вы вернулись в главное меню 👇", reply_markup=get_main_keyboard())
@@ -148,6 +169,5 @@ def handle_text(message):
     else:
         bot.send_message(message.chat.id, "Пожалуйста, используйте кнопки меню 👇", reply_markup=get_main_keyboard())
 
-print("Бот PR GRAM с 'Создать новое задание' и валютой TSugram успешно запущен!")
+print("Бот PR GRAM с проверкой заданий успешно запущен!")
 bot.infinity_polling()
-    
