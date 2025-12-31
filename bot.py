@@ -60,7 +60,7 @@ def get_tasks_keyboard():
     keyboard.add(KeyboardButton("🔙 Назад"))
     return keyboard
 
-# Подменю "Создать новое задание"
+# Подменю "Создать новое задание +"
 def get_create_task_keyboard():
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
     keyboard.add(
@@ -106,17 +106,29 @@ PR GRAM обеспечивает удобные и гибкие настройк
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
     text = message.text
-    user_id = message.from_user.id
 
     if text == "📊 Мой кабинет":
         cabinet_text = f"""
 Ваш кабинет:
 
-🔑 Мой ID: {user_id}
+🔑 Мой ID: {message.from_user.id}
 💰 Баланс: 0 TSugram
         """.strip()
 
         bot.send_message(message.chat.id, cabinet_text, reply_markup=get_cabinet_keyboard())
+
+    elif text == "🎒 Мои задания":
+        tasks_text = """
+Нажмите на кнопки, чтобы выбрать задание
+
+⚠️ Запрещено отписываться ранее чем через 7 дней от групп
+
+В противном случае ваша возможность выполнять задания будет заблокирована, а заработанные средства аннулированы.
+
+Здесь вы можете управлять своими заданиями
+        """.strip()
+
+        bot.send_message(message.chat.id, tasks_text, reply_markup=get_tasks_keyboard())
 
     elif text == "Создать новое задание +":
         create_task_text = """
@@ -127,11 +139,15 @@ def handle_text(message):
 
         bot.send_message(message.chat.id, create_task_text, reply_markup=get_create_task_keyboard())
 
-    elif text == "🔙 Назад" or text == "🔙 Назад в меню":
-        bot.send_message(message.chat.id, "Вы вернулись в предыдущее меню 👇", reply_markup=get_main_keyboard() if text == "🔙 Назад в меню" else get_tasks_keyboard())
+    elif text == "🔙 Назад":
+        bot.send_message(message.chat.id, "Вы вернулись в предыдущее меню 👇", reply_markup=get_tasks_keyboard())
+
+    elif text == "🔙 Назад в меню":
+        bot.send_message(message.chat.id, "Вы вернулись в главное меню 👇", reply_markup=get_main_keyboard())
 
     else:
         bot.send_message(message.chat.id, "Пожалуйста, используйте кнопки меню 👇", reply_markup=get_main_keyboard())
 
-print("Бот PR GRAM с валютой TSugram успешно запущен!")
+print("Бот PR GRAM с 'Создать новое задание' и валютой TSugram успешно запущен!")
 bot.infinity_polling()
+    
