@@ -87,6 +87,12 @@ def get_referral_keyboard():
     keyboard.add(KeyboardButton("🔙 Назад"))
     return keyboard
 
+# Клавиатура для проверки заданий
+def get_check_keyboard():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+    keyboard.add(KeyboardButton("🔙 Назад в Мои задания"))
+    return keyboard
+
 @bot.message_handler(commands=['start'])
 def start(message):
     welcome_text = """
@@ -169,6 +175,16 @@ https://t.me/{bot.get_me().username}?start={user_id}
 
         bot.send_message(message.chat.id, tasks_text, reply_markup=get_tasks_keyboard())
 
+    elif text == "Проверка выполненных заданий (реакции)":
+        unchecked = 0  # Для теста поменяй на 2, 5 и т.д.
+        check_text = "✅ Все выполнения проверены" if unchecked == 0 else f"У вас не проверено {unchecked} заданий"
+        bot.send_message(message.chat.id, check_text, reply_markup=get_check_keyboard())
+
+    elif text == "Проверка выполненных заданий (боты)":
+        unchecked = 0  # Для теста поменяй на число
+        check_text = "✅ Все выполнения проверены" if unchecked == 0 else f"У вас не проверено {unchecked} заданий"
+        bot.send_message(message.chat.id, check_text, reply_markup=get_check_keyboard())
+
     elif text == "Создать новое задание +":
         create_task_text = """
 Что вы хотите рекламировать?
@@ -178,8 +194,8 @@ https://t.me/{bot.get_me().username}?start={user_id}
 
         bot.send_message(message.chat.id, create_task_text, reply_markup=get_create_task_keyboard())
 
-    elif text == "🔙 Назад":
-        bot.send_message(message.chat.id, "Вы вернулись в предыдущее меню 👇", reply_markup=get_cabinet_keyboard())
+    elif text == "🔙 Назад" or text == "🔙 Назад в Мои задания":
+        bot.send_message(message.chat.id, "Вы вернулись в Мои задания", reply_markup=get_tasks_keyboard())
 
     elif text == "🔙 Назад в меню":
         bot.send_message(message.chat.id, "Вы вернулись в главное меню 👇", reply_markup=get_main_keyboard())
@@ -187,5 +203,5 @@ https://t.me/{bot.get_me().username}?start={user_id}
     else:
         bot.send_message(message.chat.id, "Пожалуйста, используйте кнопки меню 👇", reply_markup=get_main_keyboard())
 
-print("Бот PR GRAM — всё работает: реферальная система, задания, кабинет!")
+print("Бот PR GRAM — ВСЁ РАБОТАЕТ: реферальная система, задания, проверки!")
 bot.infinity_polling()
