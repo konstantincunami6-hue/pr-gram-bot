@@ -1,6 +1,6 @@
 import telebot
 import os
-from telebot.types import ReplyKeyboardMarkup, KeyboardButton
+from telebot.types import ReplyKeyboardMarkup, KeyboardButton, BotCommand, BotCommandScopeDefault
 
 TOKEN = os.getenv('TOKEN') or os.getenv('BOT_TOKEN') or os.getenv('API_TOKEN') or os.getenv('TELEGRAM_BOT_TOKEN')
 
@@ -9,6 +9,13 @@ if not TOKEN:
     exit()
 
 bot = telebot.TeleBot(TOKEN)
+
+# Устанавливаем команды для бокового меню (выполняется один раз при запуске)
+def set_bot_commands():
+    commands = [
+        BotCommand("start", "🔄 Перезапустить бота / Главное меню")
+    ]
+    bot.set_my_commands(commands, scope=BotCommandScopeDefault())
 
 # Главное меню
 def get_main_keyboard():
@@ -57,7 +64,7 @@ def get_tasks_keyboard():
         KeyboardButton("Проверка выполненных заданий (боты)")
     )
     keyboard.add(KeyboardButton("Создать новое задание +"))
-    keyboard.add(KeyboardButton("🔙 Назад"))  # Теперь ведёт в кабинет
+    keyboard.add(KeyboardButton("🔙 Назад"))
     return keyboard
 
 # Подменю "Создать новое задание +"
@@ -175,16 +182,6 @@ https://t.me/{bot.get_me().username}?start={user_id}
 
         bot.send_message(message.chat.id, tasks_text, reply_markup=get_tasks_keyboard())
 
-    elif text == "Проверка выполненных заданий (реакции)":
-        unchecked = 0  # Для теста поменяй на 2
-        check_text = "✅ Все выполнения проверены" if unchecked == 0 else f"У вас не проверено {unchecked} заданий"
-        bot.send_message(message.chat.id, check_text, reply_markup=get_check_keyboard())
-
-    elif text == "Проверка выполненных заданий (боты)":
-        unchecked = 0
-        check_text = "✅ Все выполнения проверены" if unchecked == 0 else f"У вас не проверено {unchecked} заданий"
-        bot.send_message(message.chat.id, check_text, reply_markup=get_check_keyboard())
-
     elif text == "Создать новое задание +":
         create_task_text = """
 Что вы хотите рекламировать?
@@ -201,8 +198,10 @@ https://t.me/{bot.get_me().username}?start={user_id}
         bot.send_message(message.chat.id, "Вы вернулись в главное меню 👇", reply_markup=get_main_keyboard())
 
     else:
-        bot.send_message(message.chat.id, "Пожалуйста, используйте кнопки меню 👇", reply_markup=get_cabinet_keyboard())
+        bot.send_message(message.chat.id, "Пожалуйста, используйте кнопки меню 👇", reply_markup=get_main_keyboard())
 
-print("Бот PR GRAM — все кнопки и навигация работают правильно!")
+# Устанавливаем боковое меню с кнопкой "Старт" при запуске бота
+set_bot_commands()
+
+print("Бот PR GRAM с боковым меню 'Старт' успешно запущен!")
 bot.infinity_polling()
-    
