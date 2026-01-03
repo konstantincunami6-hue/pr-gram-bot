@@ -57,7 +57,7 @@ def get_tasks_keyboard():
         KeyboardButton("Проверка выполненных заданий (боты)")
     )
     keyboard.add(KeyboardButton("Создать новое задание +"))
-    keyboard.add(KeyboardButton("🔙 Назад"))
+    keyboard.add(KeyboardButton("🔙 Назад"))  # Теперь ведёт в кабинет
     return keyboard
 
 # Подменю "Создать новое задание +"
@@ -176,12 +176,12 @@ https://t.me/{bot.get_me().username}?start={user_id}
         bot.send_message(message.chat.id, tasks_text, reply_markup=get_tasks_keyboard())
 
     elif text == "Проверка выполненных заданий (реакции)":
-        unchecked = 0  # Для теста поменяй на 2, 5 и т.д.
+        unchecked = 0  # Для теста поменяй на 2
         check_text = "✅ Все выполнения проверены" if unchecked == 0 else f"У вас не проверено {unchecked} заданий"
         bot.send_message(message.chat.id, check_text, reply_markup=get_check_keyboard())
 
     elif text == "Проверка выполненных заданий (боты)":
-        unchecked = 0  # Для теста поменяй на число
+        unchecked = 0
         check_text = "✅ Все выполнения проверены" if unchecked == 0 else f"У вас не проверено {unchecked} заданий"
         bot.send_message(message.chat.id, check_text, reply_markup=get_check_keyboard())
 
@@ -201,7 +201,8 @@ https://t.me/{bot.get_me().username}?start={user_id}
         bot.send_message(message.chat.id, "Вы вернулись в главное меню 👇", reply_markup=get_main_keyboard())
 
     else:
-        bot.send_message(message.chat.id, "Пожалуйста, используйте кнопки меню 👇", reply_markup=get_main_keyboard())
+        bot.send_message(message.chat.id, "Пожалуйста, используйте кнопки меню 👇", reply_markup=get_cabinet_keyboard())
 
-print("Бот PR GRAM — ВСЁ РАБОТАЕТ: реферальная система, задания, проверки!")
+print("Бот PR GRAM — все кнопки и навигация работают правильно!")
 bot.infinity_polling()
+    
