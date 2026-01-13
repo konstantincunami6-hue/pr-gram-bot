@@ -2,11 +2,7 @@ import telebot
 import os
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 
-TOKEN = os.getenv('TOKEN') or os.getenv('BOT_TOKEN') or os.getenv('API_TOKEN') or os.getenv('TELEGRAM_BOT_TOKEN')
-
-if not TOKEN:
-    print("КРИТИЧЕСКАЯ ОШИБКА: Токен не найден!")
-    exit()
+TOKEN = os.getenv('TOKEN') or '8507575219:AAEyv1TiJJbXeDQDHSMs2E-QoRvyuyFrZTw'  # ← твой токен
 
 bot = telebot.TeleBot(TOKEN)
 
@@ -46,7 +42,22 @@ def get_cabinet_keyboard():
         KeyboardButton("🌐 Изменить язык"),
         KeyboardButton("❌ Отключить уведомления")
     )
-    keyboard.add(KeyboardButton("🔙 Назад в главное меню"))  # Теперь ведёт в главное меню!
+    keyboard.add(KeyboardButton("🔙 Назад в главное меню"))  # Ведёт в главное меню
+    return keyboard
+
+# Подменю "Пополнить баланс"
+def get_topup_keyboard():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+    keyboard.add(
+        KeyboardButton("90,000 TSugram = 50 ⭐"),
+        KeyboardButton("180,000 TSugram = 100 ⭐"),
+        KeyboardButton("450,000 TSugram = 250 ⭐"),
+        KeyboardButton("1,350,000 TSugram = 750 ⭐"),
+        KeyboardButton("2,700,000 TSugram = 1499 ⭐"),
+        KeyboardButton("4,500,000 TSugram = 2499 ⭐")
+    )
+    keyboard.add(KeyboardButton("⭐ Другая сумма"))
+    keyboard.add(KeyboardButton("🔙 Назад"))
     return keyboard
 
 # Подменю "Мои задания"
@@ -57,7 +68,7 @@ def get_tasks_keyboard():
         KeyboardButton("Проверка выполненных заданий (боты)")
     )
     keyboard.add(KeyboardButton("Создать новое задание +"))
-    keyboard.add(KeyboardButton("🔙 Назад в кабинет"))
+    keyboard.add(KeyboardButton("🔙 Назад в кабинет"))  # Ведёт в кабинет
     return keyboard
 
 # Подменю "Создать новое задание +"
@@ -91,6 +102,15 @@ def get_referral_keyboard():
 def get_check_keyboard():
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
     keyboard.add(KeyboardButton("🔙 Назад в Мои задания"))
+    return keyboard
+
+# Клавиатура для ОП (Проверка подписки)
+def get_op_keyboard():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+    keyboard.add(KeyboardButton("Добавить бота в чат"))
+    keyboard.add(KeyboardButton("Добавить бота в канал"))
+    keyboard.add(KeyboardButton("Чат поддержки"))
+    keyboard.add(KeyboardButton("🔙 Назад"))
     return keyboard
 
 @bot.message_handler(commands=['start'])
@@ -130,6 +150,16 @@ def handle_text(message):
         """.strip()
 
         bot.send_message(message.chat.id, cabinet_text, reply_markup=get_cabinet_keyboard())
+
+    elif text == "💰 Пополнить баланс":
+        topup_text = """
+Если возникли проблемы с пополнением — обращайтесь: @Tsunami_TG
+
+Введите сумму пополнения в TSugram
+или выберите:
+        """.strip()
+
+        bot.send_message(message.chat.id, topup_text, reply_markup=get_topup_keyboard())
 
     elif text == "👥 Реферальная система":
         referral_text = f"""
@@ -194,6 +224,57 @@ https://t.me/{bot.get_me().username}?start={user_id}
 
         bot.send_message(message.chat.id, create_task_text, reply_markup=get_create_task_keyboard())
 
+    elif text == "🔊 ОП (Проверка подписки)":
+        op_text = """
+✅ *Функция проверки подписки на канал/чат*
+
+▸ *Шаг 1.* Добавьте бота в ваш чат с правами администратора.  
+   (Можно с помощью этой ссылки: t.me/TSUGRAM_PRBOT?startgroup=true)
+
+▸ *Шаг 2.* Добавьте бота в администраторы канала/чата, на который хотите установить проверку подписки.  
+   Вы можете передать эту ссылку администратору канала/чата.
+
+*Шаг 3.* Чтобы включить подписку на канал/чат, напишите в вашем чате команду:  
+`/setup` ссылка_или_@username  
+
+Пример:  
+`/setup @prgram_channel`  
+`/setup -1001234567890`
+
+⛔️ *Чтобы отключить функцию, вам нужно:*  
+Написать команду:  
+`/unsetup` ссылка (чата/канала, для которого хотите прекратить проверку)  
+Пример: `/unsetup @rove`
+
+➕ *Максимальное количество одновременной проверки* — 5 каналов/чатов
+
+❌ *Для отключения сразу всех установленных проверок* на подписки используйте команду:  
+`/unsetup all`
+
+💡 Напишите команду `/status` в вашем чате, чтобы получить перечень активных проверок на подписку, а также информацию о времени действия каждой проверки и ее отмене.
+
+🕒 *Дополнительно вы можете установить таймер* для автоматического отключения проверки подписки.  
+Пример:  
+`/setup @rove 1d`
+
+Время можно указать в секундах, минутах, часах и днях:  
+s — секунд  
+m — минут  
+h — часов  
+d — дней
+
+Если возникли сложности, обращайтесь в чат поддержки  
+@Tsunami_TG
+        """.strip()
+
+        op_keyboard = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+        op_keyboard.add(KeyboardButton("Добавить бота в чат"))
+        op_keyboard.add(KeyboardButton("Добавить бота в канал"))
+        op_keyboard.add(KeyboardButton("Чат поддержки"))
+        op_keyboard.add(KeyboardButton("🔙 Назад"))
+
+        bot.send_message(message.chat.id, op_text, parse_mode='Markdown', reply_markup=op_keyboard)
+
     elif text == "🔙 Назад" or text == "🔙 Назад в Мои задания":
         bot.send_message(message.chat.id, "Вы вернулись в Мои задания", reply_markup=get_tasks_keyboard())
 
@@ -206,6 +287,6 @@ https://t.me/{bot.get_me().username}?start={user_id}
     else:
         bot.send_message(message.chat.id, "Пожалуйста, используйте кнопки меню 👇", reply_markup=get_main_keyboard())
 
-print("Бот PR GRAM — кнопка 'Назад в главное меню' работает правильно!")
+print("Бот запущен — всё работает: кабинет, рефералка, задания, ОП с красивой инструкцией!")
 bot.infinity_polling()
-        
+   
