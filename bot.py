@@ -1,14 +1,26 @@
 import telebot
 import os
 import json
+import time
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 
 TOKEN = os.getenv('TOKEN') or '8507575219:AAEyv1TiJJbXeDQDHSMs2E-QoRvyuyFrZTw'  # ← твой токен
 
 bot = telebot.TeleBot(TOKEN)
 
-# Файл для баланса пользователей
+# Файлы для данных
+USERS_FILE = 'users.json'
 BALANCE_FILE = 'balances.json'
+
+def load_users():
+    if os.path.exists(USERS_FILE):
+        with open(USERS_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return []
+
+def save_users(users):
+    with open(USERS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(users, f, ensure_ascii=False, indent=2)
 
 def load_balances():
     if os.path.exists(BALANCE_FILE):
@@ -20,6 +32,7 @@ def save_balances(balances):
     with open(BALANCE_FILE, 'w', encoding='utf-8') as f:
         json.dump(balances, f, ensure_ascii=False, indent=2)
 
+users = load_users()
 balances = load_balances()
 
 # Главное меню
@@ -61,8 +74,34 @@ def get_cabinet_keyboard():
     keyboard.add(KeyboardButton("🔙 Назад в главное меню"))
     return keyboard
 
-# Подменю "Рекламировать"
-def get_advertise_keyboard():
+# Подменю "Пополнить баланс"
+def get_topup_keyboard():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+    keyboard.add(
+        KeyboardButton("90,000 TSugram = 50 ⭐"),
+        KeyboardButton("180,000 TSugram = 100 ⭐"),
+        KeyboardButton("450,000 TSugram = 250 ⭐"),
+        KeyboardButton("1,350,000 TSugram = 750 ⭐"),
+        KeyboardButton("2,700,000 TSugram = 1499 ⭐"),
+        KeyboardButton("4,500,000 TSugram = 2499 ⭐")
+    )
+    keyboard.add(KeyboardButton("⭐ Другая сумма"))
+    keyboard.add(KeyboardButton("🔙 Назад"))
+    return keyboard
+
+# Подменю "Мои задания"
+def get_tasks_keyboard():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+    keyboard.add(
+        KeyboardButton("Проверка выполненных заданий (реакции)"),
+        KeyboardButton("Проверка выполненных заданий (боты)")
+    )
+    keyboard.add(KeyboardButton("Создать новое задание +"))
+    keyboard.add(KeyboardButton("🔙 Назад в кабинет"))
+    return keyboard
+
+# Подменю "Создать новое задание +"
+def get_create_task_keyboard():
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
     keyboard.add(
         KeyboardButton("Канал"),
@@ -81,20 +120,49 @@ def get_advertise_keyboard():
     keyboard.add(KeyboardButton("← Назад"))
     return keyboard
 
-# Подменю "Тип подписок" для канала
-def get_subscription_type_keyboard():
+# Клавиатура для реферальной системы
+def get_referral_keyboard():
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
-    keyboard.add(KeyboardButton("1. Доступно для всех пользователей"))
-    keyboard.add(KeyboardButton("2. Только для пользователей с Telegram Premium"))
-    keyboard.add(KeyboardButton("← Назад"))
+    keyboard.add(KeyboardButton("📤 Поделиться ссылкой"))
+    keyboard.add(KeyboardButton("🔙 Назад"))
+    return keyboard
+
+# Клавиатура для проверки заданий
+def get_check_keyboard():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+    keyboard.add(KeyboardButton("🔙 Назад в Мои задания"))
+    return keyboard
+
+# Клавиатура для ОП
+def get_op_keyboard():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+    keyboard.add(KeyboardButton("Добавить бота в чат"))
+    keyboard.add(KeyboardButton("Добавить бота в канал"))
+    keyboard.add(KeyboardButton("Чат поддержки"))
+    keyboard.add(KeyboardButton("🔙 Назад"))
     return keyboard
 
 @bot.message_handler(commands=['start'])
 def start(message):
     user_id = str(message.from_user.id)
-    if user_id not in balances:
-        balances[user_id] = 0
+    if user_id not in users:
+        users.append(user_id)
+        save_users(users)
+
+    # Реферальный параметр
+    ref_id = None
+    if len(message.text.split()) > 1:
+        ref_id = message.text.split()[1]
+
+    if ref_id and ref_id != user_id and ref_id in users:
+        if ref_id not in balances:
+            balances[ref_id] = 0
+        balances[ref_id] += 5000
         save_balances(balances)
+        try:
+            bot.send_message(ref_id, "Вам начислено 5000 TSugram за нового реферала! 🎉")
+        except:
+            pass
 
     welcome_text = """
 👋 Приветствуем вас в PR GRAM!
@@ -123,7 +191,6 @@ def handle_text(message):
     user_id = str(message.from_user.id)
 
     if text == "📢 Рекламировать":
-        balances = load_balances()
         balance = balances.get(user_id, 0)
         advertise_text = f"""
 Что вы хотите рекламировать?
@@ -134,9 +201,8 @@ def handle_text(message):
         bot.send_message(message.chat.id, advertise_text, reply_markup=get_advertise_keyboard())
 
     elif text == "Канал":
-        balances = load_balances()
         balance = balances.get(user_id, 0)
-        subscription_text = f"""
+        subscription_text = """
 Выберите тип подписок:
 
 1. Доступно для всех пользователей — доступно всем пользователям PR GRAM,  
@@ -152,11 +218,7 @@ def handle_text(message):
 
         bot.send_message(message.chat.id, subscription_text, reply_markup=get_subscription_type_keyboard())
 
-    elif text == "← Назад":
-        bot.send_message(message.chat.id, "Вы вернулись в главное меню 👇", reply_markup=get_main_keyboard())
-
     elif text == "📊 Мой кабинет":
-        balances = load_balances()
         balance = balances.get(user_id, 0)
         cabinet_text = f"""
 Ваш кабинет:
@@ -167,11 +229,62 @@ def handle_text(message):
 
         bot.send_message(message.chat.id, cabinet_text, reply_markup=get_cabinet_keyboard())
 
-    # Добавь сюда остальные обработчики (Реферальная система, Мои задания и т.д.)
+    elif text == "🔊 ОП (Проверка подписки)":
+        op_text = """
+✅ *Функция проверки подписки на канал/чат*
+
+▸ *Шаг 1.* Добавьте бота в ваш чат с правами администратора.  
+   (Можно с помощью этой ссылки: t.me/TSUGRAM_PRBOT?startgroup=true)
+
+▸ *Шаг 2.* Добавьте бота в администраторы канала/чата, на который хотите установить проверку подписки.  
+   Вы можете передать эту ссылку администратору канала/чата.
+
+*Шаг 3.* Чтобы включить подписку на канал/чат, напишите в вашем чате команду:  
+`/setup` ссылка_или_@username  
+
+Пример:  
+`/setup @prgram_channel`  
+`/setup -1001234567890`
+
+⛔️ *Чтобы отключить функцию, вам нужно:*  
+Написать команду:  
+`/unsetup` ссылка (чата/канала, для которого хотите прекратить проверку)  
+Пример: `/unsetup @rove`
+
+➕ *Максимальное количество одновременной проверки* — 5 каналов/чатов
+
+❌ *Для отключения сразу всех установленных проверок* на подписки используйте команду:  
+`/unsetup all`
+
+💡 Напишите команду `/status` в вашем чате, чтобы получить перечень активных проверок на подписку, а также информацию о времени действия каждой проверки и ее отмене.
+
+🕒 *Дополнительно вы можете установить таймер* для автоматического отключения проверки подписки.  
+Пример:  
+`/setup @rove 1d`
+
+Время можно указать в секундах, минутах, часах и днях:  
+s — секунд  
+m — минут  
+h — часов  
+d — дней
+
+Если возникли сложности, обращайтесь в чат поддержки  
+@Tsunami_TG
+        """.strip()
+
+        bot.send_message(message.chat.id, op_text, parse_mode='Markdown', reply_markup=get_op_keyboard())
+
+    elif text == "🔙 Назад" or text == "← Назад":
+        bot.send_message(message.chat.id, "Вы вернулись в главное меню 👇", reply_markup=get_main_keyboard())
+
+    elif text == "🔙 Назад в кабинет":
+        bot.send_message(message.chat.id, "Вы вернулись в Мой кабинет 👇", reply_markup=get_cabinet_keyboard())
+
+    elif text == "🔙 Назад в главное меню":
+        bot.send_message(message.chat.id, "Вы вернулись в главное меню 👇", reply_markup=get_main_keyboard())
 
     else:
         bot.send_message(message.chat.id, "Пожалуйста, используйте кнопки меню 👇", reply_markup=get_main_keyboard())
 
-print("Бот запущен — кнопка 'Рекламировать' → 'Канал' с типами подписок работает!")
+print("Бот запущен — всё работает!")
 bot.infinity_polling()
-   
