@@ -4,11 +4,11 @@ import json
 import time
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 
-TOKEN = os.getenv('TOKEN') or '8507575219:AAEyv1TiJJbXeDQDHSMs2E-QoRvyuyFrZTw'  # ← твой токен
+TOKEN = os.getenv('TOKEN') or '8507575219:AAEyv1TiJJbXeDQDHSMs2E-QoRvyuyFrZTw'
 
 bot = telebot.TeleBot(TOKEN)
 
-# Файлы для данных
+# Файлы для хранения данных
 USERS_FILE = 'users.json'
 BALANCE_FILE = 'balances.json'
 
@@ -142,6 +142,14 @@ def get_op_keyboard():
     keyboard.add(KeyboardButton("🔙 Назад"))
     return keyboard
 
+# Подменю "Тип подписок" для канала
+def get_subscription_type_keyboard():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+    keyboard.add(KeyboardButton("1. Доступно для всех пользователей"))
+    keyboard.add(KeyboardButton("2. Только для пользователей с Telegram Premium"))
+    keyboard.add(KeyboardButton("← Назад"))
+    return keyboard
+
 @bot.message_handler(commands=['start'])
 def start(message):
     user_id = str(message.from_user.id)
@@ -202,7 +210,7 @@ def handle_text(message):
 
     elif text == "Канал":
         balance = balances.get(user_id, 0)
-        subscription_text = """
+        subscription_text = f"""
 Выберите тип подписок:
 
 1. Доступно для всех пользователей — доступно всем пользователям PR GRAM,  
@@ -286,5 +294,7 @@ d — дней
     else:
         bot.send_message(message.chat.id, "Пожалуйста, используйте кнопки меню 👇", reply_markup=get_main_keyboard())
 
-print("Бот запущен — всё работает!")
+print("Бот запущен — всё на месте!")
 bot.infinity_polling()
+
+        
