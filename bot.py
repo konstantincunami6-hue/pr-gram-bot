@@ -198,7 +198,6 @@ def handle_text(message):
     text = message.text
     user_id = str(message.from_user.id)
 
-    # Обработка кнопок главного меню
     if text == "📊 Мой кабинет":
         balance = balances.get(user_id, 0)
         cabinet_text = f"""
@@ -357,8 +356,8 @@ d — дней
         bot.send_message(message.chat.id, subscription_text, reply_markup=get_subscription_type_keyboard())
 
     # Навигация "Назад"
-    elif text in ["🔙 Назад", "← Назад"]:
-        bot.send_message(message.chat.id, "Вы вернулись в главное меню 👇", reply_markup=get_main_keyboard())
+    elif text in ["🔙 Назад", "← Назад", "🔙 Назад в Мои задания"]:
+        bot.send_message(message.chat.id, "Вы вернулись в предыдущее меню 👇", reply_markup=get_main_keyboard())
 
     elif text == "🔙 Назад в кабинет":
         bot.send_message(message.chat.id, "Вы вернулись в Мой кабинет 👇", reply_markup=get_cabinet_keyboard())
@@ -366,12 +365,8 @@ d — дней
     elif text == "🔙 Назад в главное меню":
         bot.send_message(message.chat.id, "Вы вернулись в главное меню 👇", reply_markup=get_main_keyboard())
 
-    elif text == "🔙 Назад в Мои задания":
-        bot.send_message(message.chat.id, "Вы вернулись в Мои задания", reply_markup=get_tasks_keyboard())
-
     else:
         bot.send_message(message.chat.id, "Пожалуйста, используйте кнопки меню 👇", reply_markup=get_main_keyboard())
 
-print("Бот запущен — все кнопки работают!")
+print("Бот запущен — кнопка ОП и все остальные работают!")
 bot.infinity_polling()
-        
