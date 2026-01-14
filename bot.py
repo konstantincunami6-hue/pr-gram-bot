@@ -198,6 +198,7 @@ def handle_text(message):
     text = message.text
     user_id = str(message.from_user.id)
 
+    # Мой кабинет
     if text == "📊 Мой кабинет":
         balance = balances.get(user_id, 0)
         cabinet_text = f"""
@@ -209,6 +210,7 @@ def handle_text(message):
 
         bot.send_message(message.chat.id, cabinet_text, reply_markup=get_cabinet_keyboard())
 
+    # Пополнить баланс
     elif text == "💰 Пополнить баланс":
         topup_text = """
 Если возникли проблемы с пополнением — обращайтесь: @Tsunami_TG
@@ -219,6 +221,7 @@ def handle_text(message):
 
         bot.send_message(message.chat.id, topup_text, reply_markup=get_topup_keyboard())
 
+    # Реферальная система
     elif text == "👥 Реферальная система":
         referral_text = f"""
 За каждого, кто перейдёт по вашей ссылке, вы получите:
@@ -246,10 +249,12 @@ https://t.me/{bot.get_me().username}?start={user_id}
 
         bot.send_message(message.chat.id, referral_text, reply_markup=get_referral_keyboard())
 
+    # Поделиться ссылкой
     elif text == "📤 Поделиться ссылкой":
         share_text = f"Присоединяйся в PR GRAM и зарабатывай TSugram!\nМоя реферальная ссылка:\nhttps://t.me/{bot.get_me().username}?start={user_id}"
         bot.send_message(message.chat.id, share_text, reply_markup=get_referral_keyboard())
 
+    # Мои задания
     elif text == "🎒 Мои задания":
         tasks_text = """
 Нажмите на кнопки, чтобы выбрать задание
@@ -263,25 +268,27 @@ https://t.me/{bot.get_me().username}?start={user_id}
 
         bot.send_message(message.chat.id, tasks_text, reply_markup=get_tasks_keyboard())
 
+    # Проверка заданий (реакции)
     elif text == "Проверка выполненных заданий (реакции)":
-        unchecked = 0  # Для теста поменяй на число
-        check_text = "✅ Все выполнения проверены" if unchecked == 0 else f"У вас не проверено {unchecked} заданий"
+        check_text = "✅ Все выполнения проверены"  # Для теста
         bot.send_message(message.chat.id, check_text, reply_markup=get_check_keyboard())
 
+    # Проверка заданий (боты)
     elif text == "Проверка выполненных заданий (боты)":
-        unchecked = 0
-        check_text = "✅ Все выполнения проверены" if unchecked == 0 else f"У вас не проверено {unchecked} заданий"
+        check_text = "✅ Все выполнения проверены"  # Для теста
         bot.send_message(message.chat.id, check_text, reply_markup=get_check_keyboard())
 
+    # Создать новое задание
     elif text == "Создать новое задание +":
-        create_task_text = """
+        create_text = """
 Что вы хотите рекламировать?
 
 💰 Баланс: 0 TSugram
         """.strip()
 
-        bot.send_message(message.chat.id, create_task_text, reply_markup=get_create_task_keyboard())
+        bot.send_message(message.chat.id, create_text, reply_markup=get_create_task_keyboard())
 
+    # ОП (Проверка подписки) — теперь работает!
     elif text == "🔊 ОП (Проверка подписки)":
         op_text = """
 ✅ *Функция проверки подписки на канал/чат*
@@ -327,6 +334,7 @@ d — дней
 
         bot.send_message(message.chat.id, op_text, parse_mode='Markdown', reply_markup=get_op_keyboard())
 
+    # Рекламировать
     elif text == "📢 Рекламировать":
         balance = balances.get(user_id, 0)
         advertise_text = f"""
@@ -337,6 +345,7 @@ d — дней
 
         bot.send_message(message.chat.id, advertise_text, reply_markup=get_advertise_keyboard())
 
+    # Канал (из рекламы)
     elif text == "Канал":
         balance = balances.get(user_id, 0)
         subscription_text = f"""
@@ -368,5 +377,5 @@ d — дней
     else:
         bot.send_message(message.chat.id, "Пожалуйста, используйте кнопки меню 👇", reply_markup=get_main_keyboard())
 
-print("Бот запущен — кнопка ОП и все остальные работают!")
+print("Бот запущен — все кнопки работают!")
 bot.infinity_polling()
